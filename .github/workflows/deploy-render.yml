@@ -1,0 +1,45 @@
+name: Deploy to Render
+
+on:
+  push:
+    branches:
+      - staging
+      - main
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK_STAGING != '' || secrets.RENDER_BACKEND_DEPLOY_HOOK_PROD != '' }}
+    steps:
+      - name: Trigger Render backend deploy
+        env:
+          RENDER_BACKEND_DEPLOY_HOOK_STAGING: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK_STAGING }}
+          RENDER_BACKEND_DEPLOY_HOOK_PROD: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK_PROD }}
+          GITHUB_BRANCH: ${{ github.ref_name }}
+        run: |
+          if [ "$GITHUB_BRANCH" = "staging" ] && [ -n "$RENDER_BACKEND_DEPLOY_HOOK_STAGING" ]; then
+            curl -X POST "$RENDER_BACKEND_DEPLOY_HOOK_STAGING"
+          elif [ "$GITHUB_BRANCH" = "main" ] && [ -n "$RENDER_BACKEND_DEPLOY_HOOK_PROD" ]; then
+            curl -X POST "$RENDER_BACKEND_DEPLOY_HOOK_PROD"
+          else
+            echo "No backend deploy hook configured for branch $GITHUB_BRANCH"
+          fi
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK_STAGING != '' || secrets.RENDER_FRONTEND_DEPLOY_HOOK_PROD != '' }}
+    steps:
+      - name: Trigger Render frontend deploy
+        env:
+          RENDER_FRONTEND_DEPLOY_HOOK_STAGING: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK_STAGING }}
+          RENDER_FRONTEND_DEPLOY_HOOK_PROD: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK_PROD }}
+          GITHUB_BRANCH: ${{ github.ref_name }}
+        run: |
+          if [ "$GITHUB_BRANCH" = "staging" ] && [ -n "$RENDER_FRONTEND_DEPLOY_HOOK_STAGING" ]; then
+            curl -X POST "$RENDER_FRONTEND_DEPLOY_HOOK_STAGING"
+          elif [ "$GITHUB_BRANCH" = "main" ] && [ -n "$RENDER_FRONTEND_DEPLOY_HOOK_PROD" ]; then
+            curl -X POST "$RENDER_FRONTEND_DEPLOY_HOOK_PROD"
+          else
+            echo "No frontend deploy hook configured for branch $GITHUB_BRANCH"
+          fi
+

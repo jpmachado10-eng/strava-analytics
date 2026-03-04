@@ -144,6 +144,13 @@ ENV/
 env.bak/
 venv.bak/
 
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/.vite/
+*.log
+
+
 # Spyder project settings
 .spyderproject
 .spyproject
